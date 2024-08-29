@@ -26,6 +26,11 @@ const favoriteBlog = (blogs) => {
 }
 
 const mostBlogs = (blogs) => {
+
+  if (blogs.length === 0) {
+    return null;
+  }
+
   // Agroup the blogs by author and count its ocurrences
   const authorBlogsCount = _.countBy(blogs, 'author');
   // Find the author with the most blogs
@@ -38,6 +43,10 @@ const mostBlogs = (blogs) => {
 };
 
 const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return null;
+  }
+
   // Agroup the blogs by author and sum the likes
   const likesByAuthor = _.mapValues(_.groupBy(blogs, 'author'), (blogs) =>
     _.sumBy(blogs, 'likes')
