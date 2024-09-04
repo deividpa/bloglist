@@ -13,7 +13,7 @@ const favoriteBlog = (blogs) => {
     return null
   }
 
-  // Find the blog with the most likes
+  // Find the blog with the most amount of likes
   const favorite = blogs.reduce((prev, current) => 
     current.likes > prev.likes ? current : prev
   )
@@ -52,7 +52,7 @@ const mostLikes = (blogs) => {
     _.sumBy(blogs, 'likes')
   );
 
-  // Find the author with the most likes
+  // Find the author with most likes
   const author = _.maxBy(_.keys(likesByAuthor), (author) => likesByAuthor[author]);
 
   return {
