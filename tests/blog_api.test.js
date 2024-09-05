@@ -3,11 +3,9 @@ const assert = require('assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const helper = require('./tests_helper');
-
-const Blog = require('../models/Blog');
-
+const Blog = require('../models/Blog')
 const api = supertest(app)
+const helper = require('./tests_helper')
 
 /* 4.8 - 4-12 exercises start */
 
