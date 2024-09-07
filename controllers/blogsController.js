@@ -2,23 +2,25 @@ const mongoose = require('mongoose')
 const blogsRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/Blog')
+const User = require('../models/User')
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
+// Deleted due to middleware.tokenExtractor
+// const getTokenFrom = request => {
+//   const authorization = request.get('authorization')
+//   if (authorization && authorization.startsWith('Bearer ')) {
+//     return authorization.replace('Bearer ', '')
+//   }
+//   return null
+// }
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
 })
 
 blogsRouter.get('/:id', async (request, response) => {
-  const { id } = request.params;
-  const blog = await Blog.findById(id);
+  const { id } = request.params
+  const blog = await Blog.findById(id).populate('user', { username: 1, name: 1 })
   if (blog) {
     response.status(200).json(blog);
   } else {
@@ -27,16 +29,8 @@ blogsRouter.get('/:id', async (request, response) => {
 });
 
 blogsRouter.post('/', async (request, response) => {
-
+  const user = request.user
   const { title, url, author, likes } = request.body
-
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
-  const user = await User.findById(decodedToken.id)
 
   if (!title || !url) {
       return response.status(400).json({ error: 'title or url missing' })
@@ -51,7 +45,7 @@ blogsRouter.post('/', async (request, response) => {
   })
 
   const savedBlog = await blog.save()
-  user.notes = user.notes.concat(savedNote._id)
+  user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
   response.status(201).json(savedBlog)
@@ -59,18 +53,25 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response) => {
   const { id } = request.params;
+  const user = request.user
 
     // Check if the id is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return response.status(400).json({ error: 'Malformatted ID' });
     }
 
-    const result = await Blog.findByIdAndDelete(id);
+    const blog = await Blog.findById(id);
 
-    if (!result) {
+    if (!blog) {
       return response.status(404).json({ error: 'Blog not found' });
     }
 
+    // Check if the user is the creator of the blog
+    if (blog.user.toString() !== user._id.toString()) {
+      return response.status(403).json({ error: 'You do not have permission to delete this blog' });
+    }
+
+    await Blog.findByIdAndDelete(id);
     response.status(204).end();
 });
 
