@@ -1,6 +1,8 @@
 // utils/middleware.js
 
+const jwt = require('jsonwebtoken')
 const logger = require('./logger')
+const User = require('../models/User')
 
 // Middleware for logging requests
 const requestLogger = (request, response, next) => {

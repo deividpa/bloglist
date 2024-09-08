@@ -29,7 +29,7 @@ app.use(middleware.tokenExtractor)
 app.use(middleware.requestLogger)
 
 /* router /api/blogs */
-app.use('/api/blogs', middleware.userExtractor, blogsRouter) 
+app.use('/api/blogs', blogsRouter) 
 /* router /api/users */
 app.use('/api/users', usersRouter)
 /* router /api/login */
